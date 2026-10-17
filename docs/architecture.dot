@@ -1,0 +1,35 @@
+digraph VMSystem {
+  graph [rankdir=TB, splines=polyline, nodesep=0.38, ranksep=0.48, pad=0.22, bgcolor="white", fontname="Arial", fontsize=18, label="Predictive and Adaptive Virtual Memory Management - System Architecture", labelloc=t];
+  node [shape=box, style="rounded,filled", fillcolor="#edf4fb", color="#52769b", fontname="Arial", fontsize=10, penwidth=1.2, margin="0.14,0.10"];
+  edge [color="#596b7a", penwidth=1.2, arrowsize=0.7, fontname="Arial", fontsize=9];
+
+  workload [label="Synthetic Workload Generator\n5 patterns + repeatable seeds"];
+  scheduler [label="Round-robin Process Scheduler\nP1 ... Pn"];
+  address [label="Virtual Address\nVPN + page offset"];
+  translate [label="Translation\nTLB -> two-level page table"];
+  memory [label="Physical Memory Model\n16 frames by default"];
+  fault [label="Page-fault Handler + Replacement\nFIFO / LRU / Clock / Optimal"];
+  {rank=same; workload; scheduler; address; translate; memory;}
+  workload -> scheduler -> address -> translate -> memory;
+  translate -> fault [label="page absent", constraint=false, color="#b38b35"];
+  fault -> memory [label="map victim / update", constraint=false, color="#b38b35"];
+
+  telemetry [label="Runtime Metrics\nPage faults + references"];
+  working [label="Working-set Estimator\nCurrent and trend-based demand"];
+  detector [label="Thrashing Detector\nFault rate + overload thresholds", fillcolor="#fff4d8", color="#b38b35"];
+  controller [label="Adaptive Controller", fillcolor="#e1f3ed", color="#3c9282"];
+  actions [label="Adaptive Actions\nFrame redistribution + process suspension"];
+  {rank=same; telemetry; working; detector; controller; actions;}
+  telemetry -> working -> detector -> controller -> actions;
+  memory -> telemetry [label="access outcomes"];
+  actions -> scheduler [label="allocation / pause / resume", constraint=false, color="#328b7e"];
+  actions -> fault [label="active frame ownership", constraint=false, color="#328b7e"];
+
+  dashboard [label="Tkinter Dashboard\nProcess + frame tables"];
+  charts [label="Performance Charts\nFault rate + pressure trends"];
+  output [label="CSV Outputs\nRun-level data + summaries"];
+  {rank=same; dashboard; charts; output;}
+  dashboard -> charts -> output;
+  telemetry -> dashboard [label="metrics / event log", constraint=false, color="#75639b"];
+  controller -> dashboard [label="intervention events", constraint=false, color="#75639b"];
+}
