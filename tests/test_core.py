@@ -87,6 +87,36 @@ class SimulatorTests(unittest.TestCase):
         after = (sim.references, sim.page_faults, sim.tlb.hits, sim.tlb.misses, sim.tick)
         self.assertEqual(before, after)
 
+    def test_supported_workload_patterns_produce_valid_sequences(self):
+        for pattern in MemorySimulator.WORKLOAD_PATTERNS:
+            sim = MemorySimulator(total_frames=8, num_processes=2, sequence_length=50,
+                                  seed=123, workload_pattern=pattern, adaptive_enabled=False)
+            sim.run_to_completion()
+            self.assertEqual(sim.references, 100, pattern)
+            for process in sim.processes:
+                self.assertEqual(len(process.sequence), 50, pattern)
+                self.assertTrue(all(0 <= vpn < 64 for vpn in process.sequence), pattern)
+
+    def test_adaptive_mechanisms_can_be_enabled_independently(self):
+        red = MemorySimulator(total_frames=8, num_processes=2, sequence_length=60, seed=42,
+                              frame_redistribution_enabled=True, process_suspension_enabled=False)
+        sus = MemorySimulator(total_frames=8, num_processes=2, sequence_length=60, seed=42,
+                              frame_redistribution_enabled=False, process_suspension_enabled=True)
+        self.assertTrue(red.frame_redistribution_enabled)
+        self.assertFalse(red.process_suspension_enabled)
+        self.assertFalse(sus.frame_redistribution_enabled)
+        self.assertTrue(sus.process_suspension_enabled)
+
+    def test_suspension_only_preserves_frame_ownership_invariants(self):
+        sim = MemorySimulator(total_frames=8, num_processes=4, sequence_length=80, seed=42,
+                              frame_redistribution_enabled=False, process_suspension_enabled=True)
+        sim.run_to_completion()
+        allocated = [idx for indexes in sim.allocations.values() for idx in indexes]
+        self.assertEqual(sorted(allocated), list(range(sim.total_frames)))
+        for pid, indexes in sim.allocations.items():
+            for idx in indexes:
+                self.assertEqual(sim.frames[idx].owner, pid)
+
     def test_translation_inspector_validation(self):
         sim = MemorySimulator(total_frames=4, num_processes=2, sequence_length=10)
         with self.assertRaises(ValueError):
