@@ -131,7 +131,10 @@ def main() -> None:
     ax.text(0.5, 0.93, f"{reduction:.1f}% fewer page-table accesses with TLB", ha="center", transform=ax.transAxes)
     save_both(fig, "tlb_effect")
     cairosvg.svg2png(url=str(DOCS / "architecture_diagram.svg"), write_to=str(DOCS / "architecture_diagram.png"), output_width=1400)
-    print(f"Generated figure files under {FIGS} and rendered the architecture diagram.")
+    for name in ("gui_dashboard_baseline", "gui_dashboard_adaptive"):
+        source = DOCS / "screenshots" / f"{name}.svg"
+        cairosvg.svg2png(url=str(source), write_to=str(DOCS / "screenshots" / f"{name}.png"), output_width=1400)
+    print(f"Generated figures under {FIGS}, architecture rendering, and dashboard layout illustrations.")
 
 if __name__ == "__main__":
     main()
