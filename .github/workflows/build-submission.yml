@@ -14,6 +14,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: submission-artifacts-main
+  cancel-in-progress: true
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -50,6 +54,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add benchmark_results.csv benchmark_summary.csv benchmark_paired_summary.csv
-          git add docs/architecture_diagram.png docs/figures docs/Virtual_Memory_Management_Project_Report.docx docs/Virtual_Memory_Management_Project_Report.pdf
+          git add docs/architecture_diagram.png docs/figures docs/screenshots/*.png docs/Virtual_Memory_Management_Project_Report.docx docs/Virtual_Memory_Management_Project_Report.pdf
           git commit -m "Build benchmark data, figures, and submission report" || exit 0
           git push origin HEAD:main
