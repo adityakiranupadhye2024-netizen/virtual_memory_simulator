@@ -131,6 +131,10 @@ class MemorySimulator:
         adaptive_enabled: bool = True,
         sequence_length: int = 400,
         seed: int = 42,
+        workload_pattern: str = "phase_locality",
+        frame_redistribution_enabled: Optional[bool] = None,
+        process_suspension_enabled: Optional[bool] = None,
+        record_history: bool = True,
     ) -> None:
         if total_frames < 2:
             raise ValueError("Use at least 2 physical frames.")
@@ -142,12 +146,25 @@ class MemorySimulator:
             raise ValueError(f"Unknown page replacement algorithm: {algorithm}")
         if sequence_length < 1:
             raise ValueError("Sequence length must be positive.")
+        if workload_pattern not in self.WORKLOAD_PATTERNS:
+            raise ValueError(f"Unknown workload pattern: {workload_pattern}")
 
         self.total_frames = total_frames
         self.algorithm = algorithm
         self.tlb_enabled = tlb_enabled
         self.adaptive_enabled = adaptive_enabled
+        # Explicit switches support ablation experiments while preserving the GUI's
+        # original master adaptive_enabled behavior.
+        self.frame_redistribution_enabled = bool(
+            adaptive_enabled and (adaptive_enabled if frame_redistribution_enabled is None else frame_redistribution_enabled)
+        )
+        self.process_suspension_enabled = bool(
+            adaptive_enabled and (adaptive_enabled if process_suspension_enabled is None else process_suspension_enabled)
+        )
         self.sequence_length = sequence_length
+        self.workload_pattern = workload_pattern
+        self.record_history = record_history
+        self.max_memory_pressure_percent = 0.0
         self.seed = seed
         self.rng = random.Random(seed)
         self.tick = 0
@@ -162,42 +179,67 @@ class MemorySimulator:
         self.thrashing_active = False
         self.thrashing_detections = 0
         self.adaptive_actions = 0
+        self.frame_redistributions = 0
         self.process_suspensions = 0
         self.events: Deque[str] = deque(maxlen=250)
         self.history: List[dict] = []
         self.tlb = TranslationLookasideBuffer()
-        self.processes = self._make_processes(num_processes, sequence_length, seed)
+        self.processes = self._make_processes(num_processes, sequence_length, seed, workload_pattern)
         self.allocations: Dict[str, List[int]] = {p.pid: [] for p in self.processes}
         self.frames: List[PhysicalFrame] = []
         self._initial_allocate()
         self._record_event(
             f"Simulation initialized: {num_processes} processes, {total_frames} frames, "
             f"{algorithm}, TLB {'ON' if tlb_enabled else 'OFF'}, "
-            f"adaptive control {'ON' if adaptive_enabled else 'OFF'}."
+            f"adaptive control {'ON' if (self.frame_redistribution_enabled or self.process_suspension_enabled) else 'OFF'}; "
+            f"workload {workload_pattern}."
         )
-        self._save_snapshot()
+        if self.record_history:
+            self._save_snapshot()
+
+    WORKLOAD_PATTERNS = (
+        "phase_locality",
+        "uniform_random",
+        "sequential_scan",
+        "bursty_hotset",
+        "alternating_hotsets",
+    )
 
     @staticmethod
-    def _make_workload(length: int, seed: int) -> List[int]:
-        """Generate a locality-based stream with periodic changes of working set."""
+    def _make_workload(length: int, seed: int, pattern: str = "phase_locality") -> List[int]:
+        """Generate one of five repeatable virtual-page reference patterns."""
         rng = random.Random(seed)
         sequence: List[int] = []
         for i in range(length):
-            phase = i // 36
-            base = (phase * 7 + seed % 5) % 32
-            if rng.random() < 0.84:
-                vpn = (base + rng.randrange(8)) % 32
+            if pattern == "phase_locality":
+                phase = i // 36
+                base = (phase * 7 + seed % 5) % 32
+                vpn = (base + rng.randrange(8)) % 32 if rng.random() < 0.84 else rng.randrange(32)
+            elif pattern == "uniform_random":
+                vpn = rng.randrange(64)
+            elif pattern == "sequential_scan":
+                vpn = i % 64
+            elif pattern == "bursty_hotset":
+                phase = i // 48
+                if phase % 3 == 2:
+                    vpn = rng.randrange(64)
+                else:
+                    base = ((phase // 3) * 13 + seed % 8) % 56
+                    vpn = (base + rng.randrange(6)) % 64 if rng.random() < 0.9 else rng.randrange(64)
+            elif pattern == "alternating_hotsets":
+                base = 0 if (i // 32) % 2 == 0 else 32
+                vpn = base + rng.randrange(8)
             else:
-                vpn = rng.randrange(32)
+                raise ValueError(f"Unknown workload pattern: {pattern}")
             sequence.append(vpn)
         return sequence
 
-    def _make_processes(self, count: int, length: int, seed: int) -> List[ProcessState]:
+    def _make_processes(self, count: int, length: int, seed: int, pattern: str) -> List[ProcessState]:
         return [
             ProcessState(
                 pid=f"P{i + 1}",
                 priority=count - i,
-                sequence=self._make_workload(length, seed + (i + 1) * 101),
+                sequence=self._make_workload(length, seed + (i + 1) * 101, pattern),
             )
             for i in range(count)
         ]
@@ -429,6 +471,7 @@ class MemorySimulator:
         rolling_rate = self.recent_page_fault_rate
         pressure = (100.0 * ws_demand / self.total_frames) if self.total_frames else 0.0
         predicted_pressure = 100.0 * predicted / self.total_frames
+        self.max_memory_pressure_percent = max(self.max_memory_pressure_percent, pressure)
         overloaded = ws_demand > self.total_frames or predicted > self.total_frames
         should_thrash = len(self._recent_faults) >= 10 and rolling_rate >= 0.48 and overloaded
 
@@ -443,32 +486,35 @@ class MemorySimulator:
         elif rolling_rate < 0.25 and pressure < 85:
             self.thrashing_active = False
 
-        if not self.adaptive_enabled or self.tick - self._last_intervention_tick < 20:
+        if not (self.frame_redistribution_enabled or self.process_suspension_enabled):
+            return
+        if self.tick - self._last_intervention_tick < 20:
             return
 
         if self.thrashing_active:
             active = [p for p in self.processes if not p.complete and p.suspended_until <= self.tick]
-            if len(active) > 1 and pressure >= 100:
+            suspended = False
+            if self.process_suspension_enabled and len(active) > 1 and pressure >= 100:
                 # Suspend the largest current working set, breaking ties toward lower priority.
-                victim = max(
-                    active,
-                    key=lambda p: (len(self._working_set(p)), -p.priority),
-                )
+                victim = max(active, key=lambda p: (len(self._working_set(p)), -p.priority))
                 victim.suspended_until = self.tick + 90
                 self.process_suspensions += 1
                 self.adaptive_actions += 1
+                suspended = True
                 self._record_event(
                     f"ADAPTIVE RESPONSE: suspended {victim.pid} for 90 ticks to reduce contention."
                 )
-                self._rebalance_frames()
+                if self.frame_redistribution_enabled:
+                    self._rebalance_frames()
                 self._last_intervention_tick = self.tick
-            else:
+
+            if self.frame_redistribution_enabled and not suspended:
                 changed = self._rebalance_frames()
                 if changed:
                     self.adaptive_actions += 1
                     self._record_event("ADAPTIVE RESPONSE: redistributed frames among active processes.")
                     self._last_intervention_tick = self.tick
-        elif predicted_pressure >= 115:
+        elif self.frame_redistribution_enabled and predicted_pressure >= 115:
             changed = self._rebalance_frames()
             if changed:
                 self.adaptive_actions += 1
@@ -525,7 +571,10 @@ class MemorySimulator:
         for frame in self.frames:
             if frame.index not in self.allocations[frame.owner]:
                 raise RuntimeError("Frame ownership/allocation invariant broken.")
-        return old != {pid: len(indexes) for pid, indexes in self.allocations.items()}
+        changed = old != {pid: len(indexes) for pid, indexes in self.allocations.items()}
+        if changed:
+            self.frame_redistributions += 1
+        return changed
 
     @property
     def recent_page_fault_rate(self) -> float:
