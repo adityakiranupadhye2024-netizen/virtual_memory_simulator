@@ -9,6 +9,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import cairosvg
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
@@ -129,7 +130,8 @@ def main() -> None:
     reduction = 100 * (1 - vals[0] / vals[1]) if vals[1] else 0
     ax.text(0.5, 0.93, f"{reduction:.1f}% fewer page-table accesses with TLB", ha="center", transform=ax.transAxes)
     save_both(fig, "tlb_effect")
-    print(f"Generated figure files under {FIGS}")
+    cairosvg.svg2png(url=str(DOCS / "architecture_diagram.svg"), write_to=str(DOCS / "architecture_diagram.png"), output_width=1400)
+    print(f"Generated figure files under {FIGS} and rendered the architecture diagram.")
 
 if __name__ == "__main__":
     main()
