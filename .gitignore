@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+*.csv
+!benchmark_results.csv
