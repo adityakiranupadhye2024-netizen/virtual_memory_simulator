@@ -1,4 +1,8 @@
+# macOS / Python local artifacts
 .DS_Store
 __pycache__/
 *.py[cod]
 .venv/
+
+# Keep reproducible benchmark outputs in the project folder and version control.
+# (Do not add a blanket *.csv rule: these CSV files are part of the report evidence.)
