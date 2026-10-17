@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="940" viewBox="0 0 1500 940" role="img" aria-labelledby="title desc">
+<title id="title">Predictive and Adaptive Virtual Memory Management System Architecture</title>
+<desc id="desc">System diagram showing workloads flowing through scheduler, address translation, physical memory, page-fault handling, working-set monitoring, thrashing detection, adaptive controls, dashboard, charts and CSV output.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#596b7a"/></marker><marker id="greenArrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#328b7e"/></marker></defs>
+<rect width="1500" height="940" fill="#fff"/>
+<text x="750" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#20354a">PREDICTIVE AND ADAPTIVE VIRTUAL MEMORY MANAGEMENT</text>
+<text x="750" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#526273">System architecture</text>
+<text x="54" y="120" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#365e84">1. MEMORY-REFERENCE EXECUTION</text>
+<g font-family="Arial,sans-serif" fill="#20354a" text-anchor="middle">
+<g><rect x="55" y="150" width="245" height="90" rx="13" fill="#eaf2fb" stroke="#52769b" stroke-width="2"/><text x="177" y="184" font-size="17" font-weight="700">Workload generator</text><text x="177" y="210" font-size="14">5 patterns + fixed seeds</text></g>
+<g><rect x="350" y="150" width="245" height="90" rx="13" fill="#eaf2fb" stroke="#52769b" stroke-width="2"/><text x="472" y="184" font-size="17" font-weight="700">Process scheduler</text><text x="472" y="210" font-size="14">Round-robin P1 ... Pn</text></g>
+<g><rect x="645" y="150" width="245" height="90" rx="13" fill="#eaf2fb" stroke="#52769b" stroke-width="2"/><text x="767" y="184" font-size="17" font-weight="700">Virtual address</text><text x="767" y="210" font-size="14">VPN + page offset</text></g>
+<g><rect x="940" y="150" width="245" height="90" rx="13" fill="#eaf2fb" stroke="#52769b" stroke-width="2"/><text x="1062" y="184" font-size="17" font-weight="700">Translation</text><text x="1062" y="210" font-size="14">TLB + 2-level page table</text></g>
+<g><rect x="1235" y="150" width="210" height="90" rx="13" fill="#eaf2fb" stroke="#52769b" stroke-width="2"/><text x="1340" y="184" font-size="17" font-weight="700">Physical memory</text><text x="1340" y="210" font-size="14">Frame + resident pages</text></g>
+</g>
+<g stroke="#596b7a" stroke-width="2.5" fill="none" marker-end="url(#arrow)"><path d="M300 195 H342"/><path d="M595 195 H637"/><path d="M890 195 H932"/><path d="M1185 195 H1227"/></g>
+<rect x="865" y="285" width="330" height="82" rx="13" fill="#fff3d6" stroke="#b38b35" stroke-width="2"/><text x="1030" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#5e481b">Page-fault handler / replacement</text><text x="1030" y="342" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#5e481b">FIFO • LRU • Clock • Optimal</text>
+<path d="M1062 240 V277" stroke="#b38b35" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/><path d="M1195 326 H1340 V248" stroke="#b38b35" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+<text x="55" y="426" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#2e756a">2. MONITORING AND ADAPTIVE CONTROL</text>
+<g font-family="Arial,sans-serif" text-anchor="middle" fill="#20354a">
+<g><rect x="55" y="455" width="245" height="90" rx="13" fill="#e8f5f1" stroke="#3c9282" stroke-width="2"/><text x="177" y="490" font-size="17" font-weight="700">Runtime metrics</text><text x="177" y="516" font-size="14">Faults + references</text></g>
+<g><rect x="350" y="455" width="245" height="90" rx="13" fill="#e8f5f1" stroke="#3c9282" stroke-width="2"/><text x="472" y="490" font-size="17" font-weight="700">Working-set model</text><text x="472" y="516" font-size="14">Current + trend estimate</text></g>
+<g><rect x="645" y="455" width="245" height="90" rx="13" fill="#fff3d6" stroke="#b38b35" stroke-width="2"/><text x="767" y="490" font-size="17" font-weight="700">Thrashing detector</text><text x="767" y="516" font-size="14">Fault rate + overload</text></g>
+<g><rect x="940" y="455" width="245" height="90" rx="13" fill="#e8f5f1" stroke="#3c9282" stroke-width="2"/><text x="1062" y="490" font-size="17" font-weight="700">Adaptive controller</text><text x="1062" y="516" font-size="14">Select control response</text></g>
+<g><rect x="1235" y="455" width="210" height="90" rx="13" fill="#e8f5f1" stroke="#3c9282" stroke-width="2"/><text x="1340" y="490" font-size="17" font-weight="700">Adaptive actions</text><text x="1340" y="516" font-size="14">Redistribute / suspend</text></g>
+</g>
+<g stroke="#3c9282" stroke-width="2.5" fill="none" marker-end="url(#greenArrow)"><path d="M300 500 H342"/><path d="M595 500 H637"/><path d="M890 500 H932"/><path d="M1185 500 H1227"/></g>
+<path d="M1340 455 V407 H1340 V250" stroke="#328b7e" stroke-width="2.5" fill="none" marker-end="url(#greenArrow)"/><text x="1360" y="392" font-family="Arial,sans-serif" font-size="13" fill="#2e756a">feedback</text>
+<path d="M1340 545 V575 H472 V247" stroke="#328b7e" stroke-width="2.5" fill="none" marker-end="url(#greenArrow)"/><text x="750" y="570" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#2e756a">reallocation / pause / resume</text>
+<text x="55" y="660" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#6b5790">3. OBSERVABILITY AND EXPERIMENT OUTPUTS</text>
+<g font-family="Arial,sans-serif" text-anchor="middle" fill="#20354a">
+<g><rect x="175" y="700" width="300" height="105" rx="13" fill="#f0ebf8" stroke="#8a75ae" stroke-width="2"/><text x="325" y="741" font-size="18" font-weight="700">Tkinter dashboard</text><text x="325" y="770" font-size="15">Process + frame tables / event log</text></g>
+<g><rect x="600" y="700" width="300" height="105" rx="13" fill="#f0ebf8" stroke="#8a75ae" stroke-width="2"/><text x="750" y="741" font-size="18" font-weight="700">Performance charts</text><text x="750" y="770" font-size="15">Fault rate + pressure trends</text></g>
+<g><rect x="1025" y="700" width="300" height="105" rx="13" fill="#f0ebf8" stroke="#8a75ae" stroke-width="2"/><text x="1175" y="741" font-size="18" font-weight="700">Experiment CSVs</text><text x="1175" y="770" font-size="15">Run-level data + summaries</text></g>
+</g>
+<g stroke="#8a75ae" stroke-width="2.5" fill="none" marker-end="url(#arrow)"><path d="M475 752 H592"/><path d="M900 752 H1017"/></g>
+<path d="M177 545 V615 H325 V692" stroke="#8a75ae" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>
+<path d="M1062 545 V630 H325 V692" stroke="#8a75ae" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>
+<text x="750" y="885" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#526273">Educational simulator • Synthetic workload traces • No interaction with the host OS memory manager</text>
+</svg>
