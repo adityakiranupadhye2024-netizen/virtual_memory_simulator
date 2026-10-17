@@ -103,7 +103,7 @@ In the default 1,000-run experiment, the combined policy reduced pooled mean fau
 - [Editable project report (Word)](docs/Virtual_Memory_Management_Project_Report.docx)
 - [Expanded experiment methodology and results](EXPERIMENT_RESULTS.md)
 - [Architecture diagram (SVG)](docs/architecture_diagram.svg) and [Graphviz source](docs/architecture.dot)
-- [Baseline GUI screenshot](docs/screenshots/gui_dashboard_baseline.jpg) and [adaptive GUI screenshot](docs/screenshots/gui_dashboard_adaptive.jpg)
+- [Baseline dashboard illustration](docs/screenshots/gui_dashboard_baseline.svg) and [adaptive dashboard illustration](docs/screenshots/gui_dashboard_adaptive.svg)
 - Benchmark figures: [overall ablation](docs/figures/overall_ablation_results.svg), [workload effects](docs/figures/lru_workload_effects.svg), [TLB effect](docs/figures/tlb_effect.svg)
 - Run-level data: \`benchmark_results.csv\`; grouped results: \`benchmark_summary.csv\`; paired ablation data: \`benchmark_paired_summary.csv\`
 
