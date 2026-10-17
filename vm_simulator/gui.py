@@ -102,7 +102,7 @@ class MemorySimulatorApp:
         for i, (key, title) in enumerate(metric_specs):
             card = ttk.LabelFrame(self.metric_frame, text=title, padding=(8, 4))
             card.grid(row=0, column=i, padx=4, sticky="nsew")
-            value = ttk.Label(card, text="—", font=("Arial", 14, "bold"), width=16)
+            value = ttk.Label(card, text="—", font=("Arial", 10, "bold"), width=24)
             value.pack(anchor="center", pady=2)
             self.metric_labels[key] = value
             self.metric_frame.columnconfigure(i, weight=1)
