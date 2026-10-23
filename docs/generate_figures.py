@@ -1,4 +1,4 @@
-"""Generate repeatable charts and a raster architecture image from checked-in project data."""
+"""Generate repeatable charts from checked-in project data."""
 from __future__ import annotations
 
 import csv
@@ -9,7 +9,6 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import cairosvg
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
@@ -130,11 +129,7 @@ def main() -> None:
     reduction = 100 * (1 - vals[0] / vals[1]) if vals[1] else 0
     ax.text(0.5, 0.93, f"{reduction:.1f}% fewer page-table accesses with TLB", ha="center", transform=ax.transAxes)
     save_both(fig, "tlb_effect")
-    cairosvg.svg2png(url=str(DOCS / "architecture_diagram.svg"), write_to=str(DOCS / "architecture_diagram.png"), output_width=1400)
-    for name in ("gui_dashboard_baseline", "gui_dashboard_adaptive"):
-        source = DOCS / "screenshots" / f"{name}.svg"
-        cairosvg.svg2png(url=str(source), write_to=str(DOCS / "screenshots" / f"{name}.png"), output_width=1400)
-    print(f"Generated figures under {FIGS}, architecture rendering, and dashboard layout illustrations.")
+    print(f"Generated figures under {FIGS}.")
 
 if __name__ == "__main__":
     main()

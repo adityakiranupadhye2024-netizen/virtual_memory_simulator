@@ -8,7 +8,6 @@ on:
       - "benchmark.py"
       - "vm_simulator/core.py"
       - "docs/generate_figures.py"
-      - "docs/build_report.py"
   workflow_dispatch:
 
 permissions:
@@ -31,29 +30,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install report and plotting dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libreoffice-writer poppler-utils
           python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt python-docx cairosvg
+          python -m pip install -r requirements.txt
       - name: Run the unit tests
         run: python -m unittest discover -s tests -v
       - name: Generate the complete benchmark dataset
         run: python benchmark.py
-      - name: Generate charts and architecture image
+      - name: Generate charts
         run: python docs/generate_figures.py
-      - name: Build the Word report
-        run: python docs/build_report.py
-      - name: Export report to PDF
-        run: |
-          libreoffice --headless --convert-to pdf --outdir docs docs/Virtual_Memory_Management_Project_Report.docx
-          pdfinfo docs/Virtual_Memory_Management_Project_Report.pdf | grep -E 'Pages:|Page size:|File size:'
       - name: Publish generated artifacts to main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add benchmark_results.csv benchmark_summary.csv benchmark_paired_summary.csv
-          git add docs/architecture_diagram.png docs/figures docs/screenshots/*.png docs/Virtual_Memory_Management_Project_Report.docx docs/Virtual_Memory_Management_Project_Report.pdf
-          git commit -m "Build benchmark data, figures, and submission report" || exit 0
+          git add docs/figures
+          git commit -m "Build benchmark data and figures" || exit 0
           git push origin HEAD:main
+

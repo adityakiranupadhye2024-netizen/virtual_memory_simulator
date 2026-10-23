@@ -99,8 +99,6 @@ In the default 1,000-run experiment, the combined policy reduced pooled mean fau
 
 ## Submission files included in this folder
 
-- [Final project report (PDF)](docs/Virtual_Memory_Management_Project_Report.pdf)
-- [Editable project report (Word)](docs/Virtual_Memory_Management_Project_Report.docx)
 - [Expanded experiment methodology and results](EXPERIMENT_RESULTS.md)
 - [Architecture diagram (SVG)](docs/architecture_diagram.svg) and [Graphviz source](docs/architecture.dot)
 - [Baseline dashboard illustration](docs/screenshots/gui_dashboard_baseline.svg) and [adaptive dashboard illustration](docs/screenshots/gui_dashboard_adaptive.svg)
@@ -124,8 +122,6 @@ virtual_memory_simulator/
 │   └── gui.py
 ├── tests/
 └── docs/
-    ├── Virtual_Memory_Management_Project_Report.pdf
-    ├── Virtual_Memory_Management_Project_Report.docx
     ├── architecture_diagram.svg
     ├── architecture.dot
     ├── generate_figures.py
