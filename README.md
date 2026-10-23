@@ -100,8 +100,7 @@ In the default 1,000-run experiment, the combined policy reduced pooled mean fau
 ## Submission files included in this folder
 
 - [Expanded experiment methodology and results](EXPERIMENT_RESULTS.md)
-- [Architecture diagram (SVG)](docs/architecture_diagram.svg) and [Graphviz source](docs/architecture.dot)
-- [Baseline dashboard illustration](docs/screenshots/gui_dashboard_baseline.svg) and [adaptive dashboard illustration](docs/screenshots/gui_dashboard_adaptive.svg)
+- [Architecture Graphviz source](docs/architecture.dot)
 - Benchmark figures: [overall ablation](docs/figures/overall_ablation_results.svg), [workload effects](docs/figures/lru_workload_effects.svg), [TLB effect](docs/figures/tlb_effect.svg)
 - Run-level data: \`benchmark_results.csv\`; grouped results: \`benchmark_summary.csv\`; paired ablation data: \`benchmark_paired_summary.csv\`
 
@@ -122,9 +121,7 @@ virtual_memory_simulator/
 │   └── gui.py
 ├── tests/
 └── docs/
-    ├── architecture_diagram.svg
     ├── architecture.dot
     ├── generate_figures.py
-    ├── figures/
-    └── screenshots/
+    └── figures/
 \`\`\`
